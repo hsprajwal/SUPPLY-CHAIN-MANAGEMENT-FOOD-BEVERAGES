@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Management</title>
+    <link rel="stylesheet" href="inventory.css">
+    <script src="inventory1.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Supply Chain Management System</h1>
+        <h1>Food and Beverages</h1>
+        <h3>Inventory Management</h3>
+        <nav>
+            <ul>
+                <li><a href="home.html">Home</a></li>
+                <li><a href="#inventoryManagement">Inventory Management</a></li>
+                <li><a href="supplier.html">Supplier Management</a></li>
+                <li><a href="order.html">Order Management</a></li>
+                <li><a href="report.html">Report Management</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <h2>Inventory</h2>
+        <table border="1" id="inventoryTable">
+            <thead>
+                <tr>
+                    <th>Select</th>
+                    <th>Product Name</th>
+                    <th>Category</th>
+                    <th>Quantity(units)</th>
+                    <th>Price</th>
+                    <th>Total Price</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- New products will be added here -->
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="5" style="text-align:right;">Sum of Amount:</td>
+                    <td id="sumOfAmount">0.00</td>
+                </tr>
+            </tfoot>
+        </table>
+        <h2>Add Product</h2>
+        <form id="productForm" onsubmit="addProduct(event);">
+            <label for="productName">Product Name:</label>
+            <input type="text" id="productName" required>
+            <label for="category">Category:</label>
+            <select id="category" required>
+                <option value="Fruits">Fruits</option>
+                <option value="Vegetables">Vegetables</option>
+                <option value="Meat">Meat, poultry</option>
+                <option value="Dairy">Dairy</option>
+                <option value="Beverages">Beverages</option>
+            </select>
+            <label for="quantity">Quantity:</label>
+            <input type="number" id="quantity" required>
+            <label for="price">Price:</label>
+            <input type="number" id="price" required>
+            <button type="submit">Save</button>
+        </form>
+        <h2>Order Section</h2>
+        <button onclick="showOrderSection()">Order</button>
+        <section id="orderSection" style="display:none;">
+            <h2>Select Category</h2>
+            <select id="orderCategory" onchange="showProductsByCategory()">
+                <option value="">Select Category</option>
+                <option value="Fruits">Fruits</option>
+                <option value="Vegetables">Vegetables</option>
+                <option value="Meat">Meat, poultry</option>
+                <option value="Dairy">Dairy</option>
+                <option value="Beverages">Beverages</option>
+            </select>
+            <h2>Place Order</h2>
+            <table border="1" id="orderTable">
+                <thead>
+                    <tr>
+                        <th>Product Name</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Actions</th> <!-- New column for actions -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Order products will be listed here -->
+                </tbody>
+            </table>
+            <button onclick="addMoreProducts()">Add More</button>
+            <button onclick="placeOrder()">Place Order</button>
+
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2024-25 Supply Chain Management System. All rights reserved</p>
+    </footer>
+</body>
+</html>

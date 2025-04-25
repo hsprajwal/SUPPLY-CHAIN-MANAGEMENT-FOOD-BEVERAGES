@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Management</title>
+    <link rel="stylesheet" href="report.css">
+    <script>
+        window.onload = function() {
+            // Fetch data from local storage
+            const inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+            const orderedProducts = JSON.parse(localStorage.getItem('orderedProducts')) || [];
+            const totalAmountReceived = parseFloat(localStorage.getItem('totalAmountReceived')) || 0;
+            const sumOfAmount = parseFloat(localStorage.getItem('sumOfAmount')) || 0;
+
+            // Calculate total amount of inventory
+            let totalInventoryAmount = 0;
+            let totalRemainingItems = 0;
+            inventory.forEach(item => {
+                totalInventoryAmount += item.price * item.quantity;
+                totalRemainingItems += item.quantity;
+            });
+
+            // Calculate total number of items ordered
+            let totalOrderedItems = 0;
+            orderedProducts.forEach(product => {
+                totalOrderedItems += product.quantity;
+            });
+
+            // Calculate total amount of orders
+            let totalOrderAmount = 0;
+            orderedProducts.forEach(product => {
+                totalOrderAmount += product.price * product.quantity;
+            });
+
+            // Display the calculated values
+            document.getElementById('totalInventoryAmount').innerText = sumOfAmount.toFixed(2);
+            document.getElementById('totalAmountReceived').innerText = totalAmountReceived.toFixed(2);
+            document.getElementById('totalOrderedItems').innerText = totalOrderedItems;
+            document.getElementById('totalRemainingItems').innerText = totalRemainingItems;
+            document.getElementById('totalOrderAmount').innerText = totalOrderAmount.toFixed(2);
+
+            // Display unpaid orders
+            const unpaidOrdersTableBody = document.getElementById('unpaidOrdersTable').getElementsByTagName('tbody')[0];
+            orderedProducts.forEach(product => {
+                if (!product.paid) {
+                    const newRow = unpaidOrdersTableBody.insertRow();
+                    newRow.innerHTML = `
+                        <td>${product.productName}</td>
+                        <td>${product.category}</td>
+                        <td>${product.price}</td>
+                        <td>${product.quantity}</td>
+                        <td>${(product.price * product.quantity).toFixed(2)}</td>
+                    `;
+                }
+            });
+        }
+        
+    </script>
+</head>
+<body>
+    <header>
+        <h1>Supply Chain Management System</h1>
+        <h1>Food and Beverages</h1>
+        <h3>Report Management</h3>
+        <nav>
+            <ul>
+                <li><a href="home.html">Home</a></li>
+                <li><a href="inventory.html">Inventory Management</a></li>
+                <li><a href="supplier.html">Supplier Management</a></li>
+                <li><a href="order.html">Order Management</a></li>
+                
+                <li><a href="#report.html">Report Management</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <h2>Report Management</h2>
+        <h3>Total Amount of Inventory: $<span id="totalInventoryAmount">0.00</span></h3>
+        <h3>Total Amount Received from Orders: $<span id="totalAmountReceived">0.00</span></h3>
+        <h3>Total Number of Items Ordered: <span id="totalOrderedItems">0</span></h3>
+       
+        <!-- <h3>Total Amount of Orders: $<span id="totalAmountt">0.00</span></h3> -->
+        <!-- <h3>Unpaid Orders:</h3>
+        <table border="1" id="unpaidOrdersTable">
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Total Price</th>
+                </tr>
+            </thead>
+            <tbody> -->
+                <!-- Unpaid orders will be listed here -->
+            <!-- </tbody>
+        </table> -->
+    </main>
+    <footer>
+        <p>&copy; 2024-25 Supply Chain Management System. All rights reserved</p>
+    </footer>
+</body>
+</html>

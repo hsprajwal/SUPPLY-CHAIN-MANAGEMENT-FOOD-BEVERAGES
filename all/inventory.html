@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Management</title>
+    <link rel="stylesheet" href="inventory.css">
+    <script>
+        let sumOfAmount = 0;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Reset sumOfAmount and clear localStorage
+            sumOfAmount = 0;
+            localStorage.removeItem('sumOfAmount');
+            document.getElementById('sumOfAmount').innerText = sumOfAmount.toFixed(2);
+        });
+
+        function addProduct() {
+            // Get the input values
+            const productName = document.getElementById('productName').value;
+            const category = document.getElementById('category').value;
+            const quantity = parseInt(document.getElementById('quantity').value);
+            const price = parseFloat(document.getElementById('price').value);
+            const totalPrice = quantity * price;
+
+            // Get the table body
+            const table = document.getElementById('inventoryTable').getElementsByTagName('tbody')[0];
+            let existingRow = null;
+
+            // Check if the product already exists in the table
+            for (let i = 0; i < table.rows.length; i++) {
+                const row = table.rows[i];
+                if (row.cells[0].innerText === productName && row.cells[1].innerText === category && parseFloat(row.cells[3].innerText) === price) {
+                    existingRow = row;
+                    break;
+                }
+            }
+
+            if (existingRow) {
+                // Update the existing row
+                const existingQuantity = parseInt(existingRow.cells[2].innerText);
+                const newQuantity = existingQuantity + quantity;
+                const newTotalPrice = newQuantity * price;
+                existingRow.cells[2].innerText = newQuantity;
+                existingRow.cells[4].innerText = newTotalPrice.toFixed(2);
+            } else {
+                // Create a new row and cells
+                const newRow = table.insertRow();
+                newRow.insertCell(0).innerText = productName;
+                newRow.insertCell(1).innerText = category;
+                newRow.insertCell(2).innerText = quantity;
+                newRow.insertCell(3).innerText = price.toFixed(2);
+                newRow.insertCell(4).innerText = totalPrice.toFixed(2);
+            }
+
+            // Update the sum of amount
+            sumOfAmount += totalPrice;
+            document.getElementById('sumOfAmount').innerText = sumOfAmount.toFixed(2);
+
+            // Store the updated sum of amount in local storage
+            localStorage.setItem('sumOfAmount', sumOfAmount.toFixed(2));
+
+            // Clear the input fields
+            document.getElementById('productForm').reset();
+        }
+
+        function showOrderSection() {
+            document.getElementById('orderSection').style.display = 'block';
+            populateCategorySelect();
+        }
+
+        function populateCategorySelect() {
+            const categorySelect = document.getElementById('orderCategory');
+            categorySelect.innerHTML = '<option value="">Select Category</option>';
+
+            const inventoryTableBody = document.getElementById('inventoryTable').getElementsByTagName('tbody')[0];
+            const categories = new Set();
+
+            for (let i = 0; i < inventoryTableBody.rows.length; i++) {
+                const row = inventoryTableBody.rows[i];
+                categories.add(row.cells[1].innerText);
+            }
+
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.innerText = category;
+                categorySelect.appendChild(option);
+            });
+        }
+
+        function showProductsByCategory() {
+            const selectedCategory = document.getElementById('orderCategory').value;
+            const orderTableBody = document.getElementById('orderTable').getElementsByTagName('tbody')[0];
+            const inventoryTableBody = document.getElementById('inventoryTable').getElementsByTagName('tbody')[0];
+
+            for (let i = 0; i < inventoryTableBody.rows.length; i++) {
+                const row = inventoryTableBody.rows[i];
+                if (row.cells[1].innerText === selectedCategory) {
+                    const newRow = orderTableBody.insertRow();
+                    newRow.innerHTML = `
+                        <td>${row.cells[0].innerText}</td>
+                        <td>${row.cells[1].innerText}</td>
+                        <td>${row.cells[3].innerText}</td>
+                        <td><input type="number" min="0" max="${row.cells[2].innerText}" value="0"></td>
+                    `;
+                }
+            }
+        }
+
+        function addMoreProducts() {
+            populateCategorySelect();
+            document.getElementById('orderCategory').value = '';
+        }
+
+        function placeOrder() {
+            const orderTableBody = document.getElementById('orderTable').getElementsByTagName('tbody')[0];
+            const inventoryTableBody = document.getElementById('inventoryTable').getElementsByTagName('tbody')[0];
+            let totalOrderedAmount = 0;
+            const orderedProducts = [];
+            let canPlaceOrder = true;
+
+            for (let i = 0; i < orderTableBody.rows.length; i++) {
+                const orderRow = orderTableBody.rows[i];
+                const productName = orderRow.cells[0].innerText;
+                const category = orderRow.cells[1].innerText;
+                const orderQuantity = parseInt(orderRow.cells[3].getElementsByTagName('input')[0].value);
+
+                for (let j = 0; j < inventoryTableBody.rows.length; j++) {
+                    const inventoryRow = inventoryTableBody.rows[j];
+                    if (inventoryRow.cells[0].innerText === productName && inventoryRow.cells[1].innerText === category) {
+                        const inventoryQuantity = parseInt(inventoryRow.cells[2].innerText);
+                        if (orderQuantity > inventoryQuantity) {
+                            alert(`Not possible to place order for ${productName} because no sufficient products are available.`);
+                            canPlaceOrder = false;
+                            break;
+                        } else {
+                            const newQuantity = inventoryQuantity - orderQuantity;
+                            inventoryRow.cells[2].innerText = newQuantity;
+                            const price = parseFloat(inventoryRow.cells[3].innerText);
+                            const newTotalPrice = newQuantity * price;
+                            inventoryRow.cells[4].innerText = newTotalPrice.toFixed(2);
+                            totalOrderedAmount += orderQuantity * price;
+
+                            // Add ordered product details to the array
+                            orderedProducts.push({
+                                productName: productName,
+                                category: category,
+                                price: price,
+                                quantity: orderQuantity,
+                                paid: false
+                            });
+                        }
+                    }
+                }
+                if (!canPlaceOrder) break;
+            }
+
+            if (canPlaceOrder) {
+                // Calculate the new sum of amount
+                sumOfAmount -= totalOrderedAmount;
+                document.getElementById('sumOfAmount').innerText = sumOfAmount.toFixed(2);
+
+                // Store the updated sum of amount in local storage
+                localStorage.setItem('sumOfAmount', sumOfAmount.toFixed(2));
+
+                // Store ordered products in local storage
+                localStorage.setItem('orderedProducts', JSON.stringify(orderedProducts));
+
+                // Navigate to order.html
+                window.location.href = 'order.html';
+            }
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <h1>Supply Chain Management System</h1>
+        <h1>Food and Beverages</h1>
+        <h3>Inventory Management</h3>
+        <nav>
+            <ul>
+                <li><a href="home.html">Home</a></li>
+                <li><a href="#inventoryManagement">Inventory Management</a></li>
+                <li><a href="supplier.html">Supplier Management</a></li>
+                <li><a href="order.html">Order Management</a></li>
+                <li><a href="report.html">Report Management</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <h2>Inventory</h2>
+        <table border="1" id="inventoryTable">
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th>Category</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Total Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- New products will be added here -->
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4" style="text-align:right;">Sum of Amount:</td>
+                    <td id="sumOfAmount">0.00</td>
+                </tr>
+            </tfoot>
+        </table>
+        <h2>Add Product</h2>
+        <form id="productForm" onsubmit="event.preventDefault(); addProduct();">
+            <label for="productName">Product Name:</label>
+            <input type="text" id="productName" required>
+            <label for="category">Category:</label>
+            <select id="category" required>
+                <option value="Fruits">Fruits</option>
+                <option value="Vegetables">Vegetables</option>
+                <option value="Meat">Meat, poultry</option>
+                <option value="Dairy">Dairy</option>
+                <option value="Beverages">Beverages</option>
+            </select>
+            <label for="quantity">Quantity:</label>
+            <input type="number" id="quantity" required>
+            <label for="price">Price:</label>
+            <input type="number" id="price" required>
+            <button type="submit">Add Product</button>
+        </form>
+        <h2>Order Section</h2>
+        <button onclick="showOrderSection()">Order</button>
+        <section id="orderSection" style="display:none;">
+            <h2>Select Category</h2>
+            <select id="orderCategory" onchange="showProductsByCategory()">
+                <option value="">Select Category</option>
+                <option value="Fruits">Fruits</option>
+                <option value="Vegetables">Vegetables</option>
+                <option value="Meat">Meat, poultry</option>
+                <option value="Dairy">Dairy</option>
+                <option value="Beverages">Beverages</option>
+            </select>
+            <h2>Place Order</h2>
+            <table border="1" id="orderTable">
+                <thead>
+                    <tr>
+                        <th>Product Name</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Order products will be listed here -->
+                </tbody>
+            </table>
+            <button onclick="addMoreProducts()">Add More</button>
+            <button onclick="placeOrder()">Place Order</button>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2024-25 Supply Chain Management System. All rights reserved</p>
+    </footer>
+</body>
+</html>

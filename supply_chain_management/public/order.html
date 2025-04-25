@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Management</title>
+    <link rel="stylesheet" href="order.css">
+    <script>
+        let totalAmountReceived = 0;
+        let totalAmount = 0;
+
+        window.onload = function() {
+            // Initialize totalAmountReceived to 0 if not present in local storage
+            if (!localStorage.getItem('totalAmountReceived')) {
+                localStorage.setItem('totalAmountReceived', '0');
+            }
+            totalAmountReceived = parseFloat(localStorage.getItem('totalAmountReceived'));
+            document.getElementById('totalAmountReceived').innerText = totalAmountReceived.toFixed(2);
+
+            const orderedProducts = JSON.parse(localStorage.getItem('orderedProducts')) || [];
+            const orderTableBody = document.getElementById('orderTable').getElementsByTagName('tbody')[0];
+
+            orderedProducts.forEach((product, index) => {
+                const totalPrice = product.price * product.quantity;
+                const newRow = orderTableBody.insertRow();
+                newRow.innerHTML = `
+                    <td>${product.productName}</td>
+                    <td>${product.category}</td>
+                    <td>${product.price}</td>
+                    <td>${product.quantity}</td>
+                    <td>${totalPrice.toFixed(2)}</td>
+                    <td><button onclick="updateStatus(this)">Status</button></td>
+                    <td><button class="paid-button" onclick="markAsPaid(this, ${index}, ${totalPrice})" ${product.paid ? 'disabled' : ''}>Paid</button></td>
+                `;
+                totalAmount += totalPrice;
+
+                const paidButton = newRow.querySelector('.paid-button');
+                if (product.paid) {
+                    paidButton.disabled = true;
+                }
+            });
+
+            // Add the total amount row
+            const totalRow = orderTableBody.insertRow();
+            totalRow.id = 'totalAmountRow';
+            totalRow.innerHTML = `
+                <td colspan="4" style="text-align:right;">Total Amount:</td>
+                <td colspan="3">${totalAmount.toFixed(2)}</td>
+            `;
+        }
+
+        function updateStatus(button) {
+            const row = button.parentNode.parentNode;
+            const productName = row.cells[0].innerText;
+            alert(`Status of ${productName} updated.`);
+        }
+
+        function markAsPaid(button, index, totalPrice) {
+            const row = button.parentNode.parentNode;
+            const productName = row.cells[0].innerText;
+
+            // Increment the total amount received
+            totalAmountReceived += totalPrice;
+            document.getElementById('totalAmountReceived').innerText = totalAmountReceived.toFixed(2);
+
+            // Decrement the total amount
+            totalAmount -= totalPrice;
+            document.getElementById('totalAmountRow').cells[1].innerText = totalAmount.toFixed(2);
+
+            // Store the updated total amount received in local storage
+            localStorage.setItem('totalAmountReceived', totalAmountReceived.toFixed(2));
+
+            // Disable the Paid button and change its color
+            button.disabled = true;
+            button.style.backgroundColor = '#6c757d';
+            button.style.cursor = 'not-allowed';
+
+            // Update the ordered products in local storage
+            const orderedProducts = JSON.parse(localStorage.getItem('orderedProducts')) || [];
+            orderedProducts.forEach(product => {
+                if (product.productName === productName && product.price * product.quantity === totalPrice) {
+                    product.paid = true;
+                }
+            });
+            localStorage.setItem('orderedProducts', JSON.stringify(orderedProducts));
+
+            // Store the disabled state
+            localStorage.setItem(`paid_${index}`, 'true');
+
+            alert(`${productName} marked as paid.`);
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        function goToReport() {
+            window.location.href = 'report.html';
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <h1>Supply Chain Management System</h1>
+        <h1>Food and Beverages</h1>
+        <h3>Order Management</h3>
+        <nav>
+            <ul>
+                <li><a href="home.html">Home</a></li>
+                <li><a href="inventory.html">Inventory Management</a></li>
+                <li><a href="supplier.html">Supplier Management</a></li>
+                <li><a href="#order.html">Order Management</a></li>
+                <li><a href="report.html">Report Management</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <h2>Order Details</h2>
+        <table border="1" id="orderTable">
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Total Price</th>
+                    <th>Status</th>
+                    <th>Paid</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Ordered products will be listed here -->
+            </tbody>
+        </table>
+        <button onclick="goBack()">Back</button>
+        <h3>Total Amount Received: <span id="totalAmountReceived">0.00</span></h3>
+        <div style="text-align: center; margin-top: 20px;">
+            <button onclick="goToReport()">Report Analysis</button>
+        </div>
+    </main>
+    <footer>
+        <p>&copy; 2024-25 Supply Chain Management System. All rights reserved</p>
+    </footer>
+</body>
+</html>

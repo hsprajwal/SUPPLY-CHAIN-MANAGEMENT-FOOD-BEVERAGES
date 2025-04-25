@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supplier Management</title>
+    <link rel="stylesheet" href="supplier.css">
+    <script src="supplier.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Supply Chain Management System</h1>
+        <h1>Food and Beverages</h1>
+        <h3>Supplier Management</h3>
+        <nav>
+            <ul>
+                <li><a href="home.html">Home</a></li>
+                <li><a href="inventory.html">Inventory Management</a></li>
+                <li><a href="#supplierManagement">Supplier Management</a></li>
+                <li><a href="order.html">Order Management</a></li>
+                <li><a href="report.html">Report Management</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <button onclick="toggleSupplierForm()">Add Supplier</button>
+        <section id="supplier-form-section" style="display:none;">
+            <form id="add-supplier-form" onsubmit="saveSupplier(event)">
+                <label for="supplier-name">Supplier Name:</label>
+                <input type="text" id="supplier-name" name="name" required><br>
+                <label for="supplier-email">Email:</label>
+                <input type="email" id="supplier-email" name="email" required><br>
+                <label for="supplier-phone">Phone Number:</label>
+                <input type="text" id="supplier-phone" name="phone" required><br>
+                <label for="supplier-address">Address:</label>
+                <input type="text" id="supplier-address" name="address" required><br>
+                <h3>Product Details</h3>
+                <label for="products">Products:</label>
+                <div id="products">
+                    <!-- Initial product input will be added by JavaScript -->
+                </div>
+                <div class="button-group">
+                    <button type="button" onclick="addProduct()">Add Another Product</button>
+                    <button type="submit">Save Supplier</button>
+                    <button type="button" onclick="toggleSupplierForm()">Cancel</button>
+                </div>
+            </form>
+        </section>
+        <section>
+            <h2>Supplier List</h2>
+            <table border="1" id="supplierTable">
+                <thead>
+                    <tr>
+                        <th>Supplier Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Address</th>
+                        <th>Products</th>
+                    </tr>
+                </thead>
+                <tbody id="supplier-list">
+                    <!-- Supplier list will be displayed here -->
+                </tbody>
+                <tfoot>
+                    <tr id="total-amount-row">
+                        <td colspan="4">Total Amount to be Paid</td>
+                        <td colspan="2">${totalAmount}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2024-25 Supply Chain Management System. All rights reserved</p>
+    </footer>
+</body>
+</html>
